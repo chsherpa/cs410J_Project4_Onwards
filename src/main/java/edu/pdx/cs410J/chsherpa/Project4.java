@@ -33,10 +33,12 @@ public class Project4 {
         if( temp.toLowerCase().equals("search"))
         {
           searchFlight( client, flightInfo );
+          System.exit(1);
         }
         else if ( temp.toLowerCase().equals("print"))
         {
           displayAllFlights( client, flightInfo );
+          System.exit(1);
         }
         else if( temp.toLowerCase().equals("readme"))
         {
@@ -184,6 +186,7 @@ public class Project4 {
         {
           Flight flight = new Flight(search);
           client.addFlight(airlineName, flight);
+          client.displayAll(airlineName, search.get(2), search.get(4));
         }
       }
       catch (IOException ex)
@@ -204,24 +207,32 @@ public class Project4 {
       String airlineName = null;
       String source = null;
       String destination = null;
-      String flightNumberAsString = null;
+      //String flightNumberAsString = null;
 
       airlineName = new String( search.get(0) );
-      flightNumberAsString = new String( search.get(1) );
+     // flightNumberAsString = new String( search.get(1) );
       source = new String( search.get(2) );
       destination = new String( search.get(4) );
 
-      try {
-        if (source == null) {
-            usage("Missing flight source");
+      try
+      {
+        if (source == null)
+        {
+          usage("Missing flight source");
 
         }
-        else if (destination == null) {
-            usage("Missing destination");
+        else if (destination == null)
+        {
+          usage("Missing destination");
         }
-        else if (flightNumberAsString == null) {
-            String prettyAirline = client.getFlightsBetween(airlineName, source, destination);
-            System.out.println(prettyAirline);
+        String prettyAirline = client.getFlightsBetween(airlineName, source, destination);
+        System.out.println(prettyAirline);
+      }
+      catch ( IOException ex )
+      {
+        error("While contacting server: " + ex);
+      }
+        /*
         }
         else {
             int flightNumber;
@@ -234,9 +245,7 @@ public class Project4 {
             Flight flight = new Flight(search);
             client.addFlight(airlineName, flight);
         }
-      } catch ( IOException ex ) {
-        error("While contacting server: " + ex);
-      }
+      */
       return true;
     }
 
@@ -276,6 +285,7 @@ public class Project4 {
               System.exit(0);
             }
 
+            /*
             //Search
             if( args[i].substring(1,args[i].length() ).toLowerCase().equals("search") )
             {
@@ -294,6 +304,7 @@ public class Project4 {
                 System.exit(0);
               }
             }
+            */
 
             flags.add(args[i].trim().substring(1,args[i].length()));
             break;
@@ -415,21 +426,23 @@ public class Project4 {
      */
     private static void usage( String message )
     {
-        PrintStream err = System.err;
-        err.println("** " + message);
-        err.println();
-        err.println("usage: java Project4 host port [key] [value]");
-        err.println("  host    Host of web server");
-        err.println("  port    Port of web server");
-        err.println("  key     Key to query");
-        err.println("  value   Value to add to server");
-        err.println();
-        err.println("This simple program posts key/value pairs to the server");
-        err.println("If no value is specified, then all values are printed");
-        err.println("If no key is specified, all key/value pairs are printed");
-        err.println();
+      PrintStream err = System.err;
+      err.println("** " + message);
+      err.println();
+      err.println("usage: java Project4 host port [key] [value]");
+      err.println("  host            Host of web server");
+      err.println("  port            Port of web server");
+      err.println("  airline         Name of the airline");
+      err.println("  number          Flight Number");
+      err.println("  source          Departure airport code");
+      err.println("  departure time  Departure airport code");
+      err.println("  destination     Arrival airport code");
+      err.println("  arrival time    Arrival airport code");
+      err.println();
+      err.println("Project 4 functionality");
+      err.println();
 
-        System.exit(1);
+      System.exit(1);
     }
 
     /**

@@ -2,12 +2,14 @@ package edu.pdx.cs410J.chsherpa;
 
 //Backend Server Servlet
 import com.google.common.annotations.VisibleForTesting;
+import org.omg.PortableInterceptor.SUCCESSFUL;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.ParseException;
 
 /**
  * This servlet ultimately provides a REST API for working with an
@@ -15,6 +17,9 @@ import java.io.IOException;
  * of how to use HTTP and Java servlets to store simple key/value pairs.
  */
 public class AirlineServlet extends HttpServlet {
+  private static final String SUCCESSFULLY_ADDED_A_FLIGHT = "Successfully added a flight";
+  private static final String SUCCESSFULLY_DISPLAYED_FLIGHT = "Successfully displayed the flights";
+  private static final String SUCCESSFULLY_SEARCHED_FLIGHTS= "Successfully searched the flights";
   private Airline airline;
 
   /**
@@ -26,7 +31,48 @@ public class AirlineServlet extends HttpServlet {
   @Override
   protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
   {
-      response.setContentType( "text/plain" );
+    try
+    {
+      processRequest(request, response);
+    }
+    catch (ParseException e)
+    {
+      System.out.println("Parse Problems");
+    }
+  }
+
+  private void processRequest( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException, ParseException
+  {
+    String airlineName = getParameter( "name", request );
+    if (airlineName == null) {
+        missingRequiredParameter(response, "name");
+        return;
+    }
+
+    String source = getParameter("src", request );
+    String destination = getParameter("dest", request );
+    if( source != null && destination != null )
+      search(request,response);
+    else
+      display(request,response);
+    /*
+    String source = getParameter( "src", request );
+    if ( source == null) {
+        missingRequiredParameter( response, "src" );
+        return;
+    }
+
+    String destination = getParameter( "dest", request );
+    if ( destination == null) {
+        missingRequiredParameter( response, "dest" );
+        return;
+    } response.setContentType( "text/plain" );
+    */
+  }
+
+  private void search( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
+  {
+    response.setContentType( "text/plain" );
 
     String airlineName = getParameter( "name", request );
     if (airlineName == null) {
@@ -53,6 +99,47 @@ public class AirlineServlet extends HttpServlet {
 
     String pretty = prettyPrintFlightsBetween(source, destination);
     response.getWriter().println(pretty);
+    response.getWriter().println(SUCCESSFULLY_SEARCHED_FLIGHTS);
+    response.setStatus( HttpServletResponse.SC_OK);
+  }
+
+  private void display( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException, ParseException
+  {
+    response.setContentType("text/plain");
+
+    String airlineName = getParameter("name", request);
+    if (airlineName == null)
+    {
+      missingRequiredParameter(response, "name");
+      return;
+    }
+
+    String source = getParameter( "src", request );
+    if ( source == null) {
+        missingRequiredParameter( response, "src" );
+        return;
+    }
+
+    String destination = getParameter( "dest", request );
+    if ( destination == null) {
+        missingRequiredParameter( response, "dest" );
+        return;
+    }
+
+    if (!createOrValidateAirlineWithName(airlineName)) {
+      nonMatchingAirlineName(airlineName, response);
+      return;
+    }
+
+    response.getWriter().println( this.airline.toString() );
+
+    /*
+    if (!createOrValidateAirlineWithName(airlineName)) {
+      nonMatchingAirlineName(airlineName, response);
+      return;
+    }
+    */
+    response.getWriter().println(SUCCESSFULLY_DISPLAYED_FLIGHT);
     response.setStatus( HttpServletResponse.SC_OK);
   }
 
@@ -61,9 +148,17 @@ public class AirlineServlet extends HttpServlet {
     sb.append("Flights between ").append(source).append(" and ").append(destination).append(":\n");
     this.airline.getFlights().stream()
       .filter(f -> f.getSource().equals(source) && f.getDestination().equals(destination))
-      .forEach(flight -> sb.append("  ").append(flight).append("\n"));
+      .forEach(f -> sb.append("  ").append(f).append("\n"));
 
     return sb.toString();
+  }
+
+  private void displayAll() throws ParseException
+  {
+    for( Flight f: airline.getFlights() )
+    {
+      f.displayFlightInfo();
+    }
   }
 
   /**
@@ -129,6 +224,7 @@ public class AirlineServlet extends HttpServlet {
       Flight flight = new Flight( airlineName, number, source , departure, destination, arrival );
       airline.addFlight(flight);
 
+      response.getWriter().println(SUCCESSFULLY_ADDED_A_FLIGHT );
       response.setStatus( HttpServletResponse.SC_OK);
   }
 

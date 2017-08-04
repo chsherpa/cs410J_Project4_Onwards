@@ -3,6 +3,7 @@ package edu.pdx.cs410J.chsherpa;
 import com.google.common.annotations.VisibleForTesting;
 import edu.pdx.cs410J.web.HttpRequestHelper;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -38,8 +39,9 @@ public class AirlineRestClient extends HttpRequestHelper
       return response.getContent();
     }
 
-    public String displayAll( String airlineName ) throws IOException
+    public String displayAll(String airlineName, String source, String destination) throws IOException
     {
+      //Response response = get(this.url, "name", airlineName, "src", source, "dest", destination);
       Response response = get(this.url, "name", airlineName );
       throwExceptionIfNotOkayHttpStatus(response);
       return response.getContent();
