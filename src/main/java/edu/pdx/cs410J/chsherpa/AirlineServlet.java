@@ -54,7 +54,6 @@ public class AirlineServlet extends HttpServlet {
     String pretty = prettyPrintFlightsBetween(source, destination);
     response.getWriter().println(pretty);
     response.setStatus( HttpServletResponse.SC_OK);
-
   }
 
   private String prettyPrintFlightsBetween(String source, String destination) {

@@ -38,6 +38,13 @@ public class AirlineRestClient extends HttpRequestHelper
       return response.getContent();
     }
 
+    public String displayAll( String airlineName ) throws IOException
+    {
+      Response response = get(this.url, "name", airlineName );
+      throwExceptionIfNotOkayHttpStatus(response);
+      return response.getContent();
+    }
+
     public void addFlight(String airlineName, Flight flight) throws IOException {
       Response response =
         postToMyURL("name", airlineName,

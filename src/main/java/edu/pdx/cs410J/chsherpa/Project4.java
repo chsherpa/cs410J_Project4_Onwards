@@ -36,7 +36,7 @@ public class Project4 {
         }
         else if ( temp.toLowerCase().equals("print"))
         {
-
+          displayAllFlights( client, flightInfo );
         }
         else if( temp.toLowerCase().equals("readme"))
         {
@@ -62,7 +62,7 @@ public class Project4 {
     * Flight Info Checks
     * @param flightInfo
     */
-    public static void flightInfoCheck(List<String> flightInfo ){
+    private static void flightInfoCheck(List<String> flightInfo ){
       int argsSize = 6;
       try
       {
@@ -106,22 +106,23 @@ public class Project4 {
     * @param inputDate String to be checked; hopefully containing the desired format
     * @return String value
     */
-    public static String dateCheck( String inputDate ){
-      Date date = new Date();
+    private static String dateCheck( String inputDate ){
+      Date sDate = null, fDate = null;
       String s = null;
       try{
-        DateFormat dateInput = new SimpleDateFormat("mm/dd/yyyy hh:mm a");
-        date = dateInput.parse(inputDate);
-        if( inputDate.equals(date) ){
-          date = null;
+        SimpleDateFormat sourceFormat = new SimpleDateFormat("mm/dd/yyyy hh:mm a");
+        SimpleDateFormat destinationFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+        sDate = sourceFormat.parse(inputDate);
+        s = destinationFormat.format(sDate);
+        if( inputDate.equals(sDate) ){
+          sDate = null;
         }
-        s = date.toString();
       }
       catch (ParseException ex) {
         error( "\nSystem passed in the following arguments: " + ex.getMessage() );
       }
 
-      if( date == null ){
+      if( sDate == null ){
         error("Date argument not valid");
       }
       return s;
@@ -158,7 +159,7 @@ public class Project4 {
     * @param places  SRC/DEST input
     * @return  String value of SRC/DEST input in uppercase
     */
-    public static String SrcDestLengthCheckAndNotNumeric( String places ){
+    private static String SrcDestLengthCheckAndNotNumeric( String places ){
       if( places.length() != 3 ) {
         System.out.println( places );
         System.out.println( "Length:" + places.length() );
@@ -168,6 +169,28 @@ public class Project4 {
         error("\n"+ places +" source has numeric values ");
       }
       return places.toUpperCase();
+    }
+
+    private static boolean displayAllFlights( AirlineRestClient client, List<String> search  )
+    {
+      String airlineName = new String( search.get(0) );
+
+      try{
+        if( airlineName == null )
+        {
+          usage("Missing Airline Name");
+        }
+        else
+        {
+          Flight flight = new Flight(search);
+          client.addFlight(airlineName, flight);
+        }
+      }
+      catch (IOException ex)
+      {
+        error("While contacting server: " + ex);
+      }
+      return true;
     }
 
     /**
@@ -192,18 +215,18 @@ public class Project4 {
         if (source == null) {
             usage("Missing flight source");
 
-        } else if (destination == null) {
+        }
+        else if (destination == null) {
             usage("Missing destination");
-
-        } else if (flightNumberAsString == null) {
+        }
+        else if (flightNumberAsString == null) {
             String prettyAirline = client.getFlightsBetween(airlineName, source, destination);
             System.out.println(prettyAirline);
-
-        } else {
+        }
+        else {
             int flightNumber;
             try {
                 flightNumber = Integer.parseInt(flightNumberAsString);
-
             } catch (NumberFormatException ex) {
                 usage("Invalid flight number: " + flightNumberAsString);
                 return false;
