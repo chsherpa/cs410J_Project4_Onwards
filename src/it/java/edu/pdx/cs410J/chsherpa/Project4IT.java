@@ -23,7 +23,7 @@ public class Project4IT extends InvokeMainTestCase {
     @Test
     public void test0RemoveAllMappings() throws IOException {
       AirlineRestClient client = new AirlineRestClient(HOSTNAME, Integer.parseInt(PORT));
-        client.removeAllMappings();
+      //client.removeAllMappings();
     }
 
     @Test

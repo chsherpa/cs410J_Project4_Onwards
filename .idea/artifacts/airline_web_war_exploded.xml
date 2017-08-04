@@ -1,0 +1,40 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="airline-web:war exploded">
+    <output-path>$PROJECT_DIR$/target/airline</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="airline-web" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="Maven: edu.pdx.cs410J:projects:Summer2017" />
+          <element id="library" level="project" name="Maven: edu.pdx.cs410J:examples:Summer2017" />
+          <element id="library" level="project" name="Maven: edu.pdx.cs410J:family:Summer2017" />
+          <element id="library" level="project" name="Maven: javax.mail:javax.mail-api:1.5.5" />
+          <element id="library" level="project" name="Maven: com.google.inject:guice:4.0-beta5" />
+          <element id="library" level="project" name="Maven: javax.inject:javax.inject:1" />
+          <element id="library" level="project" name="Maven: aopalliance:aopalliance:1.0" />
+          <element id="library" level="project" name="Maven: com.google.guava:guava:16.0.1" />
+          <element id="library" level="project" name="Maven: org.codehaus.groovy:groovy-all:2.4.4" />
+          <element id="library" level="project" name="Maven: javax.servlet:javax.servlet-api:3.1.0" />
+          <element id="library" level="project" name="Maven: net.sourceforge.cobertura:cobertura:2.1.1" />
+          <element id="library" level="project" name="Maven: jaxen:jaxen:1.1.4" />
+          <element id="library" level="project" name="Maven: org.apache.ant:ant:1.8.3" />
+          <element id="library" level="project" name="Maven: org.apache.ant:ant-launcher:1.8.3" />
+          <element id="library" level="project" name="Maven: org.apache.ant:ant-junit:1.8.3" />
+          <element id="library" level="project" name="Maven: org.mortbay.jetty:servlet-api-2.5:6.1.14" />
+          <element id="library" level="project" name="Maven: org.mortbay.jetty:jetty:6.1.14" />
+          <element id="library" level="project" name="Maven: org.mortbay.jetty:jetty-util:6.1.14" />
+          <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.7.5" />
+          <element id="library" level="project" name="Maven: ch.qos.logback:logback-classic:1.0.13" />
+          <element id="library" level="project" name="Maven: ch.qos.logback:logback-core:1.0.13" />
+          <element id="library" level="project" name="Maven: org.apache.commons:commons-lang3:3.3.2" />
+        </element>
+      </element>
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/target/airline/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="javaee-facet-resources" facet="airline-web/web/Web" />
+    </root>
+  </artifact>
+</component>

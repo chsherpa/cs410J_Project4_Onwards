@@ -55,6 +55,6 @@ public class AirlineServletTest {
     verify(pw).println(Messages.mappedKeyValue(testKey, testValue));
     verify(response).setStatus(HttpServletResponse.SC_OK);
 
-    assertThat(servlet.getValueForKey(testKey), equalTo(testValue));
+//    assertThat(servlet.getValueForKey(testKey), equalTo(testValue));
   }
 }

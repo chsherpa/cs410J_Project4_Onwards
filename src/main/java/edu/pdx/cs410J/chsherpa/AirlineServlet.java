@@ -1,5 +1,6 @@
 package edu.pdx.cs410J.chsherpa;
 
+//Backend Server Servlet
 import com.google.common.annotations.VisibleForTesting;
 
 import javax.servlet.ServletException;
@@ -7,9 +8,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This servlet ultimately provides a REST API for working with an
@@ -17,7 +15,7 @@ import java.util.Map;
  * of how to use HTTP and Java servlets to store simple key/value pairs.
  */
 public class AirlineServlet extends HttpServlet {
-  private final Map<String, String> data = new HashMap<>();
+  private Airline airline;
 
   /**
    * Handles an HTTP GET request from a client by writing the value of the key
@@ -30,13 +28,43 @@ public class AirlineServlet extends HttpServlet {
   {
       response.setContentType( "text/plain" );
 
-      String key = getParameter( "key", request );
-      if (key != null) {
-          writeValue(key, response);
+    String airlineName = getParameter( "name", request );
+    if (airlineName == null) {
+        missingRequiredParameter(response, "name");
+        return;
+    }
 
-      } else {
-          writeAllMappings(response);
-      }
+    String source = getParameter( "src", request );
+    if ( source == null) {
+        missingRequiredParameter( response, "src" );
+        return;
+    }
+
+    String destination = getParameter( "dest", request );
+    if ( destination == null) {
+        missingRequiredParameter( response, "dest" );
+        return;
+    }
+
+    if (!createOrValidateAirlineWithName(airlineName)) {
+      nonMatchingAirlineName(airlineName, response);
+      return;
+    }
+
+    String pretty = prettyPrintFlightsBetween(source, destination);
+    response.getWriter().println(pretty);
+    response.setStatus( HttpServletResponse.SC_OK);
+
+  }
+
+  private String prettyPrintFlightsBetween(String source, String destination) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Flights between ").append(source).append(" and ").append(destination).append(":\n");
+    this.airline.getFlights().stream()
+      .filter(f -> f.getSource().equals(source) && f.getDestination().equals(destination))
+      .forEach(flight -> sb.append("  ").append(flight).append("\n"));
+
+    return sb.toString();
   }
 
   /**
@@ -49,25 +77,80 @@ public class AirlineServlet extends HttpServlet {
   {
       response.setContentType( "text/plain" );
 
-      String key = getParameter( "key", request );
-      if (key == null) {
-          missingRequiredParameter(response, "key");
+      String airlineName = getParameter( "name", request );
+      if (airlineName == null) {
+        missingRequiredParameter(response, "name");
+        return;
+      }
+
+      String numberAsString = getParameter( "number", request );
+      if ( numberAsString == null) {
+          missingRequiredParameter( response, "number" );
           return;
       }
 
-      String value = getParameter( "value", request );
-      if ( value == null) {
-          missingRequiredParameter( response, "value" );
-          return;
+      String source = getParameter( "src", request );
+      if ( source == null) {
+        missingRequiredParameter( response, "src" );
+        return;
       }
 
-      this.data.put(key, value);
+      String departure = getParameter("departure", request );
+      if ( departure == null ){
+        missingRequiredParameter( response, "departure");
+        return;
+      }
 
-      PrintWriter pw = response.getWriter();
-      pw.println(Messages.mappedKeyValue(key, value));
-      pw.flush();
+      String destination = getParameter( "dest", request );
+      if ( destination == null) {
+        missingRequiredParameter( response, "dest" );
+        return;
+      }
+
+      String arrival = getParameter( "arrival", request );
+      if( arrival == null ){
+        missingRequiredParameter( response, "arrival");
+        return;
+      }
+
+      int number;
+      try {
+        number = Integer.parseInt(numberAsString);
+
+      } catch (NumberFormatException ex) {
+        invalidFlightNumber(numberAsString, response);
+        return;
+      }
+
+      if (!createOrValidateAirlineWithName(airlineName)) {
+        nonMatchingAirlineName(airlineName, response);
+        return;
+      }
+
+      Flight flight = new Flight( airlineName, number, source , departure, destination, arrival );
+      airline.addFlight(flight);
 
       response.setStatus( HttpServletResponse.SC_OK);
+  }
+
+  private void nonMatchingAirlineName(String airlineName, HttpServletResponse response) throws IOException {
+    String message = "Airline not named " + airlineName;
+    response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, message);
+  }
+
+  private boolean createOrValidateAirlineWithName(String airlineName) {
+    if (this.airline != null) {
+      return this.airline.getName().equals(airlineName);
+
+    } else {
+      this.airline = new Airline(airlineName);
+      return true;
+    }
+  }
+
+  private void invalidFlightNumber(String numberAsString, HttpServletResponse response) throws IOException {
+    String message = "Invalid flight number" + numberAsString;
+    response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED, message);
   }
 
   /**
@@ -79,11 +162,7 @@ public class AirlineServlet extends HttpServlet {
   protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
       response.setContentType("text/plain");
 
-      this.data.clear();
-
-      PrintWriter pw = response.getWriter();
-      pw.println(Messages.allMappingsDeleted());
-      pw.flush();
+      this.airline = null;
 
       response.setStatus(HttpServletResponse.SC_OK);
 
@@ -99,38 +178,6 @@ public class AirlineServlet extends HttpServlet {
   {
       String message = Messages.missingRequiredParameter(parameterName);
       response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, message);
-  }
-
-  /**
-   * Writes the value of the given key to the HTTP response.
-   *
-   * The text of the message is formatted with
-   * {@link Messages#formatKeyValuePair(String, String)}
-   */
-  private void writeValue( String key, HttpServletResponse response ) throws IOException {
-      String value = this.data.get(key);
-
-      PrintWriter pw = response.getWriter();
-      pw.println(Messages.formatKeyValuePair(key, value));
-
-      pw.flush();
-
-      response.setStatus( HttpServletResponse.SC_OK );
-  }
-
-  /**
-   * Writes all of the key/value pairs to the HTTP response.
-   *
-   * The text of the message is formatted with
-   * {@link Messages#formatKeyValuePair(String, String)}
-   */
-  private void writeAllMappings( HttpServletResponse response ) throws IOException {
-      PrintWriter pw = response.getWriter();
-      Messages.formatKeyValueMap(pw, data);
-
-      pw.flush();
-
-      response.setStatus( HttpServletResponse.SC_OK );
   }
 
   /**
@@ -150,12 +197,7 @@ public class AirlineServlet extends HttpServlet {
   }
 
   @VisibleForTesting
-  void setValueForKey(String key, String value) {
-      this.data.put(key, value);
-  }
-
-  @VisibleForTesting
-  String getValueForKey(String key) {
-      return this.data.get(key);
+  Airline getAirline() {
+    return airline;
   }
 }
