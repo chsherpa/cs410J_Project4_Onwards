@@ -1,6 +1,8 @@
 package edu.pdx.cs410J.chsherpa;
 
 import java.io.*;
+import java.net.ConnectException;
+import java.net.Socket;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,7 +67,17 @@ public class Project4 {
     * @param flightInfo
     */
     private static void flightInfoCheck(List<String> flightInfo ){
-      int argsSize = 6;
+      int [] argsSize = {0,3,6};
+      int args=0;
+      for( int n : argsSize )
+      {
+        if( flightInfo.size() == n )
+        {
+          args = n;
+        }
+      }
+
+      /*
       try
       {
         if( flightInfo.size() > argsSize )
@@ -83,23 +95,41 @@ public class Project4 {
       {
         error( "System passed in the following arguments: " + ex.getMessage() +" " +flightInfo.toString() );
       }
+      */
 
-      //Set Proper Name
-      flightInfo.set(0, Proper(flightInfo.get(0)) );
-      //Check if FLIGHT NUMBER is positive numeric
-      // Source: Stackoverflow
-      if (flightInfo.get(1).matches("\\d+(\\.d\\d+)?") == false) {
-        error("Flight number is not a numeric value");
+      if( args == 0 )
+      {
+        usage("No args passed in\n");
       }
+      else if ( args == 3 )
+      {
+        //Set Proper Name
+        flightInfo.set(0, Proper(flightInfo.get(0)));
+        // Check for Source being three letters long
+        flightInfo.set(1, SrcDestLengthCheckAndNotNumeric(flightInfo.get(1)));
+        // Check for Dest being three letters long
+        flightInfo.set(2, SrcDestLengthCheckAndNotNumeric(flightInfo.get(2)));
+      }
+      else
+      {
+        //Set Proper Name
+        flightInfo.set(0, Proper(flightInfo.get(0)));
+        //Check if FLIGHT NUMBER is positive numeric
+        // Source: Stackoverflow
+        if (flightInfo.get(1).matches("\\d+(\\.d\\d+)?") == false)
+        {
+          error("Flight number is not a numeric value");
+        }
 
-      // Check for Source being three letters long
-      flightInfo.set(2, SrcDestLengthCheckAndNotNumeric(flightInfo.get(2)));
-      // Check for Dest being three letters long
-      flightInfo.set(4, SrcDestLengthCheckAndNotNumeric(flightInfo.get(4)));
-      //Date Check for Departure
-      flightInfo.set(3, dateCheck(flightInfo.get(3)) );
-      //Date Check for Arrival
-      flightInfo.set(5, dateCheck(flightInfo.get(5)) );
+        // Check for Source being three letters long
+        flightInfo.set(2, SrcDestLengthCheckAndNotNumeric(flightInfo.get(2)));
+        // Check for Dest being three letters long
+        flightInfo.set(4, SrcDestLengthCheckAndNotNumeric(flightInfo.get(4)));
+        //Date Check for Departure
+        flightInfo.set(3, dateCheck(flightInfo.get(3)));
+        //Date Check for Arrival
+        flightInfo.set(5, dateCheck(flightInfo.get(5)));
+      }
     }
 
     /**
@@ -345,42 +375,52 @@ public class Project4 {
     }
 
     private static AirlineRestClient connectToHost( List<String> hostInfo ){
-        String hostName = null;
-        String portString = null;
-        AirlineRestClient client = null;
+      String hostName = null;
+      String portString = null;
+      AirlineRestClient client = null;
 
-        for( int i =0; i < hostInfo.size(); i++ )
+      for( int i =0; i < hostInfo.size(); i++ )
+      {
+        if( hostInfo.get(i).contains("host") )
         {
-          if( hostInfo.get(i).contains("host") )
-          {
-            String[] temp = hostInfo.get(i).split(" ");
-            hostName = temp[1];
-          }
-          if( hostInfo.get(i).contains("port") )
-          {
-            String[] temp = hostInfo.get(i).split(" ");
-            portString = temp[1];
-          }
+          String[] temp = hostInfo.get(i).split(" ");
+          hostName = temp[1];
         }
-
-        if (hostName == null) {
-            usage( MISSING_ARGS );
-
-        } else if ( portString == null) {
-            usage( "Missing port" );
+        if( hostInfo.get(i).contains("port") )
+        {
+          String[] temp = hostInfo.get(i).split(" ");
+          portString = temp[1];
         }
+      }
 
-        int port;
-        try {
-            port = Integer.parseInt( portString );
+      if (hostName == null) {
+          usage( MISSING_ARGS );
 
-        } catch (NumberFormatException ex) {
-            usage("Port \"" + portString + "\" must be an integer");
-            return null;
-        }
+      } else if ( portString == null) {
+          usage( "Missing port" );
+      }
 
-        client = new AirlineRestClient(hostName, port);
-        return client;
+      int port;
+      try {
+          port = Integer.parseInt( portString );
+
+      } catch (NumberFormatException ex) {
+          usage("Port \"" + portString + "\" must be an integer");
+          return null;
+      }
+
+      Socket s = null;
+      try
+      {
+        s = new Socket(hostName, port);
+      }
+      catch (IOException e )
+      {
+        System.out.println("HostName: " + hostName );
+        System.out.println("Port: " + portString );
+        error("\nProblems in connecting ");
+      }
+      client = new AirlineRestClient(hostName, port);
 
         /*
         String message;
@@ -408,8 +448,8 @@ public class Project4 {
         }
 
         System.out.println(message);
-
         */
+        return client;
     }
 
     private static void error( String message )
