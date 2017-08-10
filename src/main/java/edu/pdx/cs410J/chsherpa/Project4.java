@@ -67,16 +67,6 @@ public class Project4 {
     * @param flightInfo
     */
     private static void flightInfoCheck(List<String> flightInfo ){
-      int [] argsSize = {0,3,6};
-      int args=0;
-      for( int n : argsSize )
-      {
-        if( flightInfo.size() == n )
-        {
-          args = n;
-        }
-      }
-
       /*
       try
       {
@@ -97,20 +87,7 @@ public class Project4 {
       }
       */
 
-      if( args == 0 )
-      {
-        usage("No args passed in\n");
-      }
-      else if ( args == 3 )
-      {
-        //Set Proper Name
-        flightInfo.set(0, Proper(flightInfo.get(0)));
-        // Check for Source being three letters long
-        flightInfo.set(1, SrcDestLengthCheckAndNotNumeric(flightInfo.get(1)));
-        // Check for Dest being three letters long
-        flightInfo.set(2, SrcDestLengthCheckAndNotNumeric(flightInfo.get(2)));
-      }
-      else
+      if( flightInfo.size() == 6 )
       {
         //Set Proper Name
         flightInfo.set(0, Proper(flightInfo.get(0)));
@@ -130,6 +107,23 @@ public class Project4 {
         //Date Check for Arrival
         flightInfo.set(5, dateCheck(flightInfo.get(5)));
       }
+
+      if( flightInfo.size() == 3 )
+      {
+        flightInfo.set(0, Proper(flightInfo.get(0)));
+        // Check for Source being three letters long
+        flightInfo.set(1, SrcDestLengthCheckAndNotNumeric(flightInfo.get(1)));
+        // Check for Dest being three letters long
+        flightInfo.set(2, SrcDestLengthCheckAndNotNumeric(flightInfo.get(2)));
+      }
+
+      /*
+      if( flightInfo.size() == 0 )
+      {
+        usage("\nPlease read the text below:\n");
+        System.exit(1);
+      }
+      */
     }
 
     /**
@@ -237,10 +231,10 @@ public class Project4 {
       String airlineName = null;
       String source = null;
       String destination = null;
-      //String flightNumberAsString = null;
+      String flightNumberAsString = null;
 
       airlineName = new String( search.get(0) );
-     // flightNumberAsString = new String( search.get(1) );
+      flightNumberAsString = new String( search.get(1) );
       source = new String( search.get(2) );
       destination = new String( search.get(4) );
 

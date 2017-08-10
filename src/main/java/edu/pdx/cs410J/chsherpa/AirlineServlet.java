@@ -2,14 +2,12 @@ package edu.pdx.cs410J.chsherpa;
 
 //Backend Server Servlet
 import com.google.common.annotations.VisibleForTesting;
-import org.omg.PortableInterceptor.SUCCESSFUL;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.text.ParseException;
 
 /**
  * This servlet ultimately provides a REST API for working with an
@@ -31,47 +29,6 @@ public class AirlineServlet extends HttpServlet {
   @Override
   protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
   {
-    try
-    {
-      processRequest(request, response);
-    }
-    catch (ParseException e)
-    {
-      System.out.println("Parse Problems");
-    }
-  }
-
-  private void processRequest( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException, ParseException
-  {
-    String airlineName = getParameter( "name", request );
-    if (airlineName == null) {
-        missingRequiredParameter(response, "name");
-        return;
-    }
-
-    String source = getParameter("src", request );
-    String destination = getParameter("dest", request );
-    if( source != null && destination != null )
-      search(request,response);
-    else
-      display(request,response);
-    /*
-    String source = getParameter( "src", request );
-    if ( source == null) {
-        missingRequiredParameter( response, "src" );
-        return;
-    }
-
-    String destination = getParameter( "dest", request );
-    if ( destination == null) {
-        missingRequiredParameter( response, "dest" );
-        return;
-    } response.setContentType( "text/plain" );
-    */
-  }
-
-  private void search( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
-  {
     response.setContentType( "text/plain" );
 
     String airlineName = getParameter( "name", request );
@@ -81,17 +38,38 @@ public class AirlineServlet extends HttpServlet {
     }
 
     String source = getParameter( "src", request );
+    String destination = getParameter( "dest", request );
+
+    if( airlineName != null && source == null && destination == null )
+    {
+      doDisplayAll(airlineName, response );
+      response.setStatus( HttpServletResponse.SC_OK);
+      return;
+    }
+
     if ( source == null) {
         missingRequiredParameter( response, "src" );
         return;
     }
 
-    String destination = getParameter( "dest", request );
     if ( destination == null) {
         missingRequiredParameter( response, "dest" );
         return;
     }
 
+    doSearch(airlineName, source, destination, response );
+  }
+
+  /**
+   * doSearch
+   * @param airlineName
+   * @param source
+   * @param destination
+   * @param response
+   * @throws IOException
+   */
+  private void doSearch( String airlineName, String source, String destination, HttpServletResponse response ) throws IOException
+  {
     if (!createOrValidateAirlineWithName(airlineName)) {
       nonMatchingAirlineName(airlineName, response);
       return;
@@ -99,47 +77,6 @@ public class AirlineServlet extends HttpServlet {
 
     String pretty = prettyPrintFlightsBetween(source, destination);
     response.getWriter().println(pretty);
-    response.getWriter().println(SUCCESSFULLY_SEARCHED_FLIGHTS);
-    response.setStatus( HttpServletResponse.SC_OK);
-  }
-
-  private void display( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException, ParseException
-  {
-    response.setContentType("text/plain");
-
-    String airlineName = getParameter("name", request);
-    if (airlineName == null)
-    {
-      missingRequiredParameter(response, "name");
-      return;
-    }
-
-    String source = getParameter( "src", request );
-    if ( source == null) {
-        missingRequiredParameter( response, "src" );
-        return;
-    }
-
-    String destination = getParameter( "dest", request );
-    if ( destination == null) {
-        missingRequiredParameter( response, "dest" );
-        return;
-    }
-
-    if (!createOrValidateAirlineWithName(airlineName)) {
-      nonMatchingAirlineName(airlineName, response);
-      return;
-    }
-
-    response.getWriter().println( this.airline.toString() );
-
-    /*
-    if (!createOrValidateAirlineWithName(airlineName)) {
-      nonMatchingAirlineName(airlineName, response);
-      return;
-    }
-    */
-    response.getWriter().println(SUCCESSFULLY_DISPLAYED_FLIGHT);
     response.setStatus( HttpServletResponse.SC_OK);
   }
 
@@ -153,12 +90,37 @@ public class AirlineServlet extends HttpServlet {
     return sb.toString();
   }
 
-  private void displayAll() throws ParseException
+  /**
+   * Display all flights in pretty format
+   * @param airlineName
+   * @param response
+   * @throws IOException
+   */
+  private void doDisplayAll( String airlineName, HttpServletResponse response ) throws IOException
   {
-    for( Flight f: airline.getFlights() )
-    {
-      f.displayFlightInfo();
+    if (!createOrValidateAirlineWithName(airlineName)) {
+      nonMatchingAirlineName(airlineName, response);
+      return;
     }
+
+    String pretty = prettyPrintFlights(airlineName);
+    response.getWriter().println(pretty);
+    response.setStatus( HttpServletResponse.SC_OK);
+  }
+
+  /**
+   *
+   * @param airlineName
+   * @return
+   */
+  private String prettyPrintFlights( String airlineName )
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Flights for ").append(airlineName).append(":\n");
+    this.airline.getFlights().stream()
+      .forEach(f->sb.append("\n").append(f).append("\n"));
+
+    return sb.toString();
   }
 
   /**
@@ -224,7 +186,6 @@ public class AirlineServlet extends HttpServlet {
       Flight flight = new Flight( airlineName, number, source , departure, destination, arrival );
       airline.addFlight(flight);
 
-      response.getWriter().println(SUCCESSFULLY_ADDED_A_FLIGHT );
       response.setStatus( HttpServletResponse.SC_OK);
   }
 
