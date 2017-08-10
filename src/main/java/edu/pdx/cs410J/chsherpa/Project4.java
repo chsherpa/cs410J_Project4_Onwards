@@ -28,35 +28,49 @@ public class Project4 {
 
       airlineArgsParser( flagOptionsList, flightInfo, hostInfo, args );
       flightInfoCheck( flightInfo );
-      client = connectToHost( hostInfo );
 
       for( String temp: flagOptionsList )
       {
         if( temp.toLowerCase().equals("search"))
         {
+          client = connectToHost( hostInfo );
           searchFlight( client, flightInfo );
           System.exit(1);
         }
         else if ( temp.toLowerCase().equals("print"))
         {
+          client = connectToHost( hostInfo );
           displayAllFlights( client, flightInfo );
           System.exit(1);
         }
-        else if( temp.toLowerCase().equals("readme"))
+        else if ( temp.toLowerCase().equals("readme"))
         {
           README();
           System.exit(1);
         }
+
       }
 
-      Flight f1 = new Flight( flightInfo );
-      try
+      if ( flightInfo.size() == 0 )
       {
-        client.addFlight( f1.getFlightName(), f1 );
+        System.out.println("Current Flights Below:\n");
+        displayAllFlights( client, flightInfo );
+        usage("\nPlease read the below text");
+        System.exit(1);
       }
-      catch (IOException e)
+
+      if( flightInfo.size() == 6 )
       {
-        error( "\nClient could not add flight: " + e.getMessage() );
+        client = connectToHost( hostInfo );
+        Flight f1 = new Flight(flightInfo);
+        try
+        {
+          client.addFlight(f1.getFlightName(), f1);
+        }
+        catch (IOException e)
+        {
+          error("\nClient could not add flight: " + e.getMessage());
+        }
       }
       System.exit(0);
     }
@@ -199,6 +213,11 @@ public class Project4 {
 
     private static boolean displayAllFlights( AirlineRestClient client, List<String> search  )
     {
+      if( search == null || search.isEmpty() )
+      {
+        return false;
+      }
+
       String airlineName = new String( search.get(0) );
 
       try{
@@ -210,7 +229,7 @@ public class Project4 {
         {
           Flight flight = new Flight(search);
           client.addFlight(airlineName, flight);
-          client.displayAll(airlineName, search.get(2), search.get(4));
+          client.displayAll(airlineName, null, null );
         }
       }
       catch (IOException ex)
@@ -233,10 +252,14 @@ public class Project4 {
       String destination = null;
       String flightNumberAsString = null;
 
+      if( search.isEmpty() || search == null )
+      {
+        return false;
+      }
+
       airlineName = new String( search.get(0) );
-      flightNumberAsString = new String( search.get(1) );
-      source = new String( search.get(2) );
-      destination = new String( search.get(4) );
+      source = new String( search.get(1) );
+      destination = new String( search.get(2) );
 
       try
       {
@@ -275,8 +298,10 @@ public class Project4 {
 
     private static void airlineArgsParser(List<String> flags, List<String> flightInfo, List<String> hostInfo, String[] args)
     {
-      for( int i = 0; i < args.length; i++ ) {
-        switch (args[i].charAt(0)) {
+      for( int i = 0; i < args.length; i++ )
+      {
+        switch (args[i].charAt(0))
+        {
           case '-'://Flag Catch
             if (args[i].length() < 2){
                 error("\nFlag arguments are too short and thus invalid.");
@@ -308,7 +333,6 @@ public class Project4 {
               error("\nPort requires a argument");
               System.exit(0);
             }
-
             /*
             //Search
             if( args[i].substring(1,args[i].length() ).toLowerCase().equals("search") )
@@ -502,9 +526,9 @@ public class Project4 {
       System.out.printf("%-20s%s","arriveTime", "Arrival date and time (12-hour time)\n");
       System.out.println( "|_Date and time should be in the format: mm/dd/yyyy hh:mm am/pm");
       System.out.println( "\nflag options (options may appear in any order):");
-      System.out.printf("%-20s%s%s", "-host hostname", "Host computer on which the server runs");
-      System.out.printf("%-20s%s", "-port port", "Port on which the server is listening");
-      System.out.printf("%-20s%s","-search", "Search for flights" );
+      System.out.printf("%-20s%s", "-host hostname", "Host computer on which the server runs\n");
+      System.out.printf("%-20s%s", "-port port", "Port on which the server is listening\n");
+      System.out.printf("%-20s%s","-search", "Search for flights\n" );
       System.out.printf("%-20s%s","-print", "Prints a description of the new flight\n");
       System.out.printf("%-20s%s","-README", "Prints a README for this project and exits\n");
     }

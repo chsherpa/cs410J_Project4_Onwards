@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <artifactId>originals-parent</artifactId>
+    <artifactId>CS410J</artifactId>
     <groupId>edu.pdx.cs410J</groupId>
-    <version>Summer2017﻿</version>
+    <version>Summer2017</version>
+    <relativePath>../pom.xml/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.pdx.cs410J.chsherpa</groupId>
@@ -95,6 +96,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
+        <version>1.7.1</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -122,7 +124,7 @@
               <docletArtifact>
                 <groupId>edu.pdx.cs410J</groupId>
                 <artifactId>grader</artifactId>
-                <version>Summer2017﻿</version>
+                <version>Summer2017</version>
               </docletArtifact>
               <useStandardDocletOptions>false</useStandardDocletOptions>
               <show>private</show>
@@ -173,7 +175,7 @@
     <dependency>
       <groupId>edu.pdx.cs410J</groupId>
       <artifactId>projects</artifactId>
-      <version>Summer2017﻿</version>
+      <version>Summer2017</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>

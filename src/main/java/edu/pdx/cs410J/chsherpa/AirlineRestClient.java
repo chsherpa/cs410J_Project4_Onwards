@@ -42,24 +42,43 @@ public class AirlineRestClient extends HttpRequestHelper
     public String displayAll(String airlineName, String source, String destination) throws IOException
     {
       //Response response = get(this.url, "name", airlineName, "src", source, "dest", destination);
-      Response response = get(this.url, "name", airlineName );
+      Response response = get(this.url, "name", airlineName, "src", null, "dest", null );
       throwExceptionIfNotOkayHttpStatus(response);
       return response.getContent();
     }
 
     public void addFlight(String airlineName, Flight flight) throws IOException {
+      String[] flightInfo = null;
+      //restParse( flight , flightInfo);
+
+      String flightNumber = String.valueOf(flight.getNumber());
+      String source = flight.getSource();
+      String departure = flight.getDepartureString();
+      String dest = flight.getDestination();
+      String arrival = flight.getArrivalString();
+
       Response response =
-        postToMyURL("name", airlineName,
-          "number", String.valueOf(flight.getNumber()),
-          "src", flight.getSource(),
-          "departure",flight.getDepartureString(),
-          "dest", flight.getDestination(),
-          "arrival",flight.getArrivalString()
+        postToMyURL(
+          "name", airlineName,
+          "number", flightNumber,
+          "src", source,
+          "departure", departure,
+          "dest", dest,
+          "arrival", arrival
         );
       throwExceptionIfNotOkayHttpStatus(response);
     }
 
-    @VisibleForTesting
+    /*
+  private void restParse(Flight flight, String[] flightInfo)
+  {
+    flightInfo = flight.toString().split(" ");
+    for( String n: flightInfo )
+      System.out.printf("\n%s", n );
+  }
+  */
+
+  @VisibleForTesting
     Response postToMyURL(String... keysAndValues) throws IOException {
       return post(this.url, keysAndValues);
     }

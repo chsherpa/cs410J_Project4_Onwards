@@ -184,7 +184,7 @@ public class AirlineServlet extends HttpServlet {
       }
 
       Flight flight = new Flight( airlineName, number, source , departure, destination, arrival );
-      airline.addFlight(flight);
+      this.airline.addFlight(flight);
 
       response.setStatus( HttpServletResponse.SC_OK);
   }
