@@ -32,7 +32,12 @@ public class Project4 {
 
       for( String temp: flagOptionsList )
       {
-        if( temp.toLowerCase().equals("search"))
+        if( temp.toLowerCase().equals("readme"))
+        {
+          README();
+          System.exit(1);
+        }
+        else if( temp.toLowerCase().equals("search"))
         {
           searchFlight( client, flightInfo );
           System.exit(1);
@@ -42,21 +47,23 @@ public class Project4 {
           displayAllFlights( client, flightInfo );
           System.exit(1);
         }
-        else if( temp.toLowerCase().equals("readme"))
-        {
-          README();
-          System.exit(1);
-        }
       }
 
-      Flight f1 = new Flight( flightInfo );
-      try
+      if( flightInfo.size() == 6 )
       {
-        client.addFlight( f1.getFlightName(), f1 );
+        Flight f1 = new Flight(flightInfo);
+        try
+        {
+          client.addFlight(f1.getFlightName(), f1);
+        }
+        catch (IOException e)
+        {
+          error("\nClient could not add flight: " + e.getMessage());
+        }
       }
-      catch (IOException e)
+      else
       {
-        error( "\nClient could not add flight: " + e.getMessage() );
+        error("\nFlight Info didn't have enough arguments! \n Flight arguments: " + flightInfo.size() );
       }
       System.exit(0);
     }
@@ -233,10 +240,24 @@ public class Project4 {
       String destination = null;
       String flightNumberAsString = null;
 
-      airlineName = new String( search.get(0) );
-      flightNumberAsString = new String( search.get(1) );
-      source = new String( search.get(2) );
-      destination = new String( search.get(4) );
+      if( search.size() == 6 )
+      {
+        airlineName = new String( search.get(0) );
+       // flightNumberAsString = new String( search.get(1) );
+        source = new String( search.get(2) );
+        destination = new String( search.get(4) );
+      }
+      else if( search.size() == 3 )
+      {
+        airlineName = new String( search.get(0) );
+        source = new String( search.get(1) );
+        destination = new String( search.get(2) );
+      }
+      else
+      {
+        error("\nMissing Args");
+      }
+
 
       try
       {
@@ -501,10 +522,10 @@ public class Project4 {
       System.out.printf("%-20s%s","dest", "Three-letter code of arrival airport\n");
       System.out.printf("%-20s%s","arriveTime", "Arrival date and time (12-hour time)\n");
       System.out.println( "|_Date and time should be in the format: mm/dd/yyyy hh:mm am/pm");
-      System.out.println( "\nflag options (options may appear in any order):");
-      System.out.printf("%-20s%s%s", "-host hostname", "Host computer on which the server runs");
-      System.out.printf("%-20s%s", "-port port", "Port on which the server is listening");
-      System.out.printf("%-20s%s","-search", "Search for flights" );
+      System.out.println( "\nflag options (options may appear in any order):\n");
+      System.out.printf("%-20s%s", "-host hostname", "Host computer on which the server runs\n");
+      System.out.printf("%-20s%s", "-port port", "Port on which the server is listening\n");
+      System.out.printf("%-20s%s","-search", "Search for flights\n" );
       System.out.printf("%-20s%s","-print", "Prints a description of the new flight\n");
       System.out.printf("%-20s%s","-README", "Prints a README for this project and exits\n");
     }
