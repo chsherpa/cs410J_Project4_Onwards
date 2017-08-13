@@ -1,15 +1,12 @@
 package edu.pdx.cs410J.chsherpa;
 
 import java.io.*;
-import java.net.ConnectException;
 import java.net.Socket;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The main class that parses the command line and communicates with the
@@ -21,10 +18,10 @@ public class Project4 {
 
     public static void main(String[] args)
     {
-      List<String> flagOptionsList = new ArrayList<String>();
-      List<String> flightInfo = new ArrayList<String>();
-      List<String> hostInfo = new ArrayList<String>();
-      AirlineRestClient client = null;
+      List<String> flagOptionsList = new ArrayList<>();
+      List<String> flightInfo = new ArrayList<>();
+      List<String> hostInfo = new ArrayList<>();
+      AirlineRestClient client;
 
       airlineArgsParser( flagOptionsList, flightInfo, hostInfo, args );
       flightInfoCheck( flightInfo );
@@ -44,6 +41,11 @@ public class Project4 {
         }
         else if ( temp.toLowerCase().equals("print"))
         {
+          if( flightInfo.size() == 6 )
+          {
+            addFlight(client, flightInfo );
+          }
+
           displayAllFlights( client, flightInfo );
           System.exit(1);
         }
@@ -54,7 +56,10 @@ public class Project4 {
         Flight f1 = new Flight(flightInfo);
         try
         {
-          client.addFlight(f1.getFlightName(), f1);
+          if (client != null)
+          {
+            client.addFlight(f1.getFlightName(), f1);
+          }
         }
         catch (IOException e)
         {
@@ -68,10 +73,9 @@ public class Project4 {
       System.exit(0);
     }
 
-
     /**
     * Flight Info Checks
-    * @param flightInfo
+    * @param flightInfo Passed in flightinfo information
     */
     private static void flightInfoCheck(List<String> flightInfo ){
       /*
@@ -163,7 +167,7 @@ public class Project4 {
 
     /**
     * Proper String Case Everything
-    * @param proper
+    * @param proper String value to be made Proper
     * @return String First Letter is UpperCased, rest are left as is
     */
     private static String Proper( String proper )
@@ -204,8 +208,45 @@ public class Project4 {
       return places.toUpperCase();
     }
 
+  /**
+   * Basic Wrapper to add flight to Servlet
+   * @param client REST Client
+   * @param toAdd List to be added
+   */
+    private static void addFlight( AirlineRestClient client, List<String> toAdd )
+    {
+      String airlineName = new String( toAdd.get(0) );
+      try
+      {
+        if (airlineName == null)
+        {
+          usage("Missing Airline Name");
+        }
+        else
+        {
+          Flight flight = new Flight(toAdd);
+          client.addFlight(airlineName, flight);
+        }
+      }
+      catch (IOException ex)
+      {
+        error("While contacting server: " + ex);
+      }
+    }
+
+    /**
+    * Wrapper to get all flights from Servlet
+    * @param client REST Client
+    * @param search Flight to be displayed
+    * @return
+    */
     private static boolean displayAllFlights( AirlineRestClient client, List<String> search  )
     {
+      if( search.size() == 0 )
+      {
+        error(MISSING_ARGS);
+      }
+
       String airlineName = new String( search.get(0) );
 
       try{
@@ -215,8 +256,7 @@ public class Project4 {
         }
         else
         {
-          Flight flight = new Flight(search);
-          client.addFlight(airlineName, flight);
+          System.out.println("Displaying all flights:\n");
           client.displayAll(airlineName, search.get(2), search.get(4));
         }
       }
@@ -228,9 +268,9 @@ public class Project4 {
     }
 
     /**
-    *
-    * @param client
-    * @param search
+    * Wrapper to search for the flights
+    * @param client REST Client
+    * @param search Flight to be searched for
     * @return
     */
     private static boolean searchFlight( AirlineRestClient client, List<String> search  )
@@ -238,14 +278,13 @@ public class Project4 {
       String airlineName = null;
       String source = null;
       String destination = null;
-      String flightNumberAsString = null;
 
       if( search.size() == 6 )
       {
         airlineName = new String( search.get(0) );
-       // flightNumberAsString = new String( search.get(1) );
         source = new String( search.get(2) );
         destination = new String( search.get(4) );
+        addFlight(client, search );
       }
       else if( search.size() == 3 )
       {
@@ -294,6 +333,14 @@ public class Project4 {
       return true;
     }
 
+  /**
+   * Parser method for the Airline args passed in
+   *
+   * @param flags Flags list to be added to
+   * @param flightInfo Flight info parsed
+   * @param hostInfo Server to be connected to
+   * @param args Args from the command line to be parsed
+   */
     private static void airlineArgsParser(List<String> flags, List<String> flightInfo, List<String> hostInfo, String[] args)
     {
       for( int i = 0; i < args.length; i++ ) {
@@ -389,6 +436,12 @@ public class Project4 {
       }
     }
 
+  /**
+   * Connect to the host
+   *
+   * @param hostInfo Server info to be connected to
+   * @return Return signal of the server connection
+   */
     private static AirlineRestClient connectToHost( List<String> hostInfo ){
       String hostName = null;
       String portString = null;
@@ -467,6 +520,11 @@ public class Project4 {
         return client;
     }
 
+  /**
+   * Error Message
+   *
+   * @param message Compilation of the error message w/ system exit
+   */
     private static void error( String message )
     {
         PrintStream err = System.err;
@@ -503,7 +561,7 @@ public class Project4 {
     /**
      * README : This explains usage of this program
      */
-    public static void README(){
+    private static void README(){
       int ProjNum = 4;
       System.out.println("Name: Chhewang Sherpa");
        System.out.println("Project " + ProjNum );
