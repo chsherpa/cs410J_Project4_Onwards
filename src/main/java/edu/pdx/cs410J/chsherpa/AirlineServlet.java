@@ -62,11 +62,11 @@ public class AirlineServlet extends HttpServlet {
 
   /**
    * doSearch
-   * @param airlineName
-   * @param source
-   * @param destination
-   * @param response
-   * @throws IOException
+   * @param airlineName name of the flight
+   * @param source source of the flight
+   * @param destination destination of the flight
+   * @param response response of the http request
+   * @throws IOException standard catch
    */
   private void doSearch( String airlineName, String source, String destination, HttpServletResponse response ) throws IOException
   {
@@ -84,17 +84,17 @@ public class AirlineServlet extends HttpServlet {
     StringBuilder sb = new StringBuilder();
     sb.append("Flights between ").append(source).append(" and ").append(destination).append(":\n");
     this.airline.getFlights().stream()
-      .filter(f -> f.getSource().equals(source) && f.getDestination().equals(destination))
-      .forEach(f -> sb.append("  ").append(f).append("\n"));
+      .filter(f -> f.getSource().equals(source) && f.getDestination().equals(destination) )
+      .forEach(f->sb.append("\n\nFlight Name: "+f.getFlightName() ).append("\nSource: " + f.getSource() ).append("\nDestination: " + f.getDestination() ) );
 
     return sb.toString();
   }
 
   /**
    * Display all flights in pretty format
-   * @param airlineName
-   * @param response
-   * @throws IOException
+   * @param airlineName name of the airline
+   * @param response return code of the http request
+   * @throws IOException standard IO catch
    */
   private void doDisplayAll( String airlineName, HttpServletResponse response ) throws IOException
   {
@@ -109,17 +109,16 @@ public class AirlineServlet extends HttpServlet {
   }
 
   /**
-   *
-   * @param airlineName
-   * @return
+   * Pretty Prints Flight Info
+   * @param airlineName name of the airline
+   * @return Return a string to be printed
    */
   private String prettyPrintFlights( String airlineName )
   {
     StringBuilder sb = new StringBuilder();
     sb.append("Flights for ").append(airlineName).append(":\n");
     this.airline.getFlights().stream()
-      .forEach(f->sb.append("\n").append(f).append("\n"));
-
+      .forEach(f->sb.append("\nFlight Name: "+f.getFlightName()+"\n").append("\nNumber: " + f.getNumber() + "\n").append("\nSource: " + f.getSource() + "\n").append("\nDeparture: " + f.getDepartureString() + "\n").append("\nDestination: " + f.getDestination() + "\n").append("\nArrival: " + f.getArrivalString() + "\n") );
     return sb.toString();
   }
 
