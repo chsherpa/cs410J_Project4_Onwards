@@ -22,6 +22,9 @@ public class Project4 {
       List<String> flightInfo = new ArrayList<>();
       List<String> hostInfo = new ArrayList<>();
       AirlineRestClient client;
+      boolean readMeFlag = false;
+      boolean searchFlag = false;
+      boolean printFlag = false;
 
       airlineArgsParser( flagOptionsList, flightInfo, hostInfo, args );
       flightInfoCheck( flightInfo );
@@ -31,28 +34,15 @@ public class Project4 {
       {
         if( temp.toLowerCase().equals("readme"))
         {
-          README();
-          System.exit(1);
+
         }
         else if( temp.toLowerCase().equals("search"))
         {
-          searchFlight( client, flightInfo );
-          System.exit(1);
+          searchFlag = true;
         }
         else if ( temp.toLowerCase().equals("print"))
         {
-          if( flightInfo.size() == 6 )
-          {
-            addFlight(client, flightInfo );
-          }
-
-          displayAllFlights( client, flightInfo );
-          System.exit(1);
-        }
-        else if( temp.toLowerCase().equals("readme"))
-        {
-          README();
-          System.exit(1);
+          printFlag = true;
         }
       }
 
@@ -71,10 +61,33 @@ public class Project4 {
           error("\nClient could not add flight: " + e.getMessage());
         }
       }
-      else
+
+      if( searchFlag )
       {
-        error("\nFlight Info didn't have enough arguments! \n Flight arguments: " + flightInfo.size() );
+        searchFlight( client, flightInfo );
+        System.exit(1);
       }
+
+      if( printFlag )
+      {
+        if( flightInfo.size() == 6 )
+        {
+          Flight f2 = new Flight(flightInfo);
+          try
+          {
+            f2.displayFlightInfo();
+          }
+          catch (ParseException e)
+          {
+            error("\nClient could not add flight: " + e.getMessage());
+          }
+        }
+        else
+        {
+          System.out.println("\nNothing to print!");
+        }
+      }
+
       System.exit(0);
     }
 
@@ -289,7 +302,6 @@ public class Project4 {
         airlineName = new String( search.get(0) );
         source = new String( search.get(2) );
         destination = new String( search.get(4) );
-        addFlight(client, search );
       }
       else if( search.size() == 3 )
       {
@@ -592,5 +604,6 @@ public class Project4 {
       System.out.printf("%-20s%s","-search", "Search for flights\n" );
       System.out.printf("%-20s%s","-print", "Prints a description of the new flight\n");
       System.out.printf("%-20s%s","-README", "Prints a README for this project and exits\n");
+      System.exit(0);
     }
 }

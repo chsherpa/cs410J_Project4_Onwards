@@ -48,9 +48,6 @@ public class AirlineRestClient extends HttpRequestHelper
     }
 
     public void addFlight(String airlineName, Flight flight) throws IOException {
-      String[] flightInfo = null;
-      //restParse( flight , flightInfo);
-
       String flightNumber = String.valueOf(flight.getNumber());
       String source = flight.getSource();
       String departure = flight.getDepartureString();

@@ -16,7 +16,6 @@ import java.io.IOException;
  */
 public class AirlineServlet extends HttpServlet {
   private static final String SUCCESSFULLY_ADDED_A_FLIGHT = "Successfully added a flight";
-  private static final String SUCCESSFULLY_DISPLAYED_FLIGHT = "Successfully displayed the flights";
   private static final String SUCCESSFULLY_SEARCHED_FLIGHTS= "Successfully searched the flights";
   private Airline airline;
 
@@ -70,14 +69,27 @@ public class AirlineServlet extends HttpServlet {
    */
   private void doSearch( String airlineName, String source, String destination, HttpServletResponse response ) throws IOException
   {
+    /*
     if (!createOrValidateAirlineWithName(airlineName)) {
       nonMatchingAirlineName(airlineName, response);
       return;
     }
+    */
 
-    String pretty = prettyPrintFlightsBetween(source, destination);
-    response.getWriter().println(pretty);
-    response.setStatus( HttpServletResponse.SC_OK);
+    if ( this.airline != null )
+    {
+      String pretty = prettyPrintFlightsBetween(source, destination);
+      response.getWriter().println(pretty);
+      response.getWriter().println(SUCCESSFULLY_SEARCHED_FLIGHTS);
+      response.setStatus( HttpServletResponse.SC_OK );
+    }
+    else
+    {
+      String message = new String( "No flights between " + source + " and " + destination );
+      response.getWriter().println(message);
+      response.getWriter().println(SUCCESSFULLY_SEARCHED_FLIGHTS);
+      response.setStatus( HttpServletResponse.SC_OK );
+    }
   }
 
   private String prettyPrintFlightsBetween(String source, String destination) {
@@ -184,7 +196,7 @@ public class AirlineServlet extends HttpServlet {
 
       Flight flight = new Flight( airlineName, number, source , departure, destination, arrival );
       this.airline.addFlight(flight);
-
+      response.getWriter().println(SUCCESSFULLY_ADDED_A_FLIGHT);
       response.setStatus( HttpServletResponse.SC_OK);
   }
 
@@ -194,10 +206,12 @@ public class AirlineServlet extends HttpServlet {
   }
 
   private boolean createOrValidateAirlineWithName(String airlineName) {
-    if (this.airline != null) {
+    if ( this.airline != null )
+    {
       return this.airline.getName().equals(airlineName);
-
-    } else {
+    }
+    else
+    {
       this.airline = new Airline(airlineName);
       return true;
     }
